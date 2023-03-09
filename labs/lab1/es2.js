@@ -9,7 +9,7 @@ class Film {
         this.score = score;
     }
     toString() {
-        return `Film(id: ${this.id}, title: ${this.title}, favorite: ${this.favorite === null ? "<not known>" : this.favorite}, watch date: ${this.watchDate === null ? "<not watched>" : this.watchDate.format('MMMM DD, YYYY')}, score: ${this.score === null ? "<not assigned>" : this.score})`;
+        return `Film(id: ${this.id}, title: ${this.title}, favorite: ${this.favorite}, watch date: ${this.watchDate === null ? "<not watched>" : this.watchDate.format('MMMM DD, YYYY')}, score: ${this.score === null ? "<not assigned>" : this.score})`;
     }
 }
 class FilmLibrary {
