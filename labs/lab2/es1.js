@@ -19,112 +19,94 @@ class FilmLibrary {
         this.films = [];
         this.db = new sqlite3.Database(db_name);
     }
-    async _internalExecuteQuery(sql_object, param, for_each_callback, resolve_object) {
+    async _internalExecuteQuery(...params) {
+        if (params.length < 2) throw new Error("Invalid number of parameters");
+        const resolve_object = params.pop();
+        const callback = params.pop();
         return new Promise((resolve, reject) => {
-            if (Array.isArray(param)) {
-                sql_object.each(...param, function (err, row) {
-                    if (err) reject(err);
-                    if (typeof row === "undefined") return;
-                    for_each_callback(row);
-                }, function (err, _) {
-                    if (err) reject(err);
-                    if (typeof sql_object.finalize === "function") {
-                        sql_object.finalize();
-                    }
-                    resolve(resolve_object);
-                })
-            } else {
-                sql_object.each(param, function (err, row) {
-                    if (err) reject(err);
-                    if (typeof row === "undefined") return;
-                    for_each_callback(row);
-                }, function (err, _) {
-                    if (err) reject(err);
-                    if (typeof sql_object.finalize === "function") {
-                        sql_object.finalize();
-                    }
-                    resolve(resolve_object);
-                })
-            }
+            this.db.each(...params, function (err, row) {
+                if (err) reject(err);
+                if (typeof row === "undefined") return;
+                callback(row, resolve_object);
+            }, function (err, _) {
+                if (err) reject(err);
+                resolve(resolve_object);
+            })
         });
     }
     async getAllFromDb() {
-        const films = [];
-        return this._internalExecuteQuery(this.db, "SELECT * FROM films", (row) => {
-            films.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
-        }, films);
+        return this._internalExecuteQuery("SELECT * FROM films", (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
     }
     async getFavouriteFromDb() {
-        const films = [];
-        return this._internalExecuteQuery(this.db, "SELECT * FROM films WHERE favorite = 1", (row) => {
-            films.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
-        }, films);
+        return this._internalExecuteQuery("SELECT * FROM films WHERE favorite = 1", (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
     }
     async getWatchedTodayFromDb() {
-        const films = [];
         const today_date_string = dayjs().format('YYYY-MM-DD');
-        const stmt = this.db.prepare("SELECT * FROM films WHERE watchdate = ?");
-        return this._internalExecuteQuery(stmt, today_date_string, (row) => {
-            films.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
-        }, films);
+        return this._internalExecuteQuery("SELECT * FROM films WHERE watchdate = ?", today_date_string, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
     }
     async getWatchedBeforeFromDb(date) {
-        const films = [];
         if (typeof date === "string") date = dayjs(date);
         const fmt_date_string = date.format('YYYY-MM-DD');
-        const stmt = this.db.prepare("SELECT * FROM films WHERE watchdate < ?");
-        return this._internalExecuteQuery(stmt, fmt_date_string, (row) => {
-            films.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
-        }, films);
+        return this._internalExecuteQuery("SELECT * FROM films WHERE watchdate < ?", fmt_date_string, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
     }
     async getRatedAtLeastFromDb(rating) {
-        const films = [];
-        const stmt = this.db.prepare("SELECT * FROM films WHERE rating >= ?");
-        return this._internalExecuteQuery(stmt, rating, (row) => {
-            films.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
-        }, films);
+        return this._internalExecuteQuery("SELECT * FROM films WHERE rating >= ?", rating, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
     }
     async getTitleLikeFromDb(title) {
-        const films = [];
-        const stmt = this.db.prepare("SELECT * FROM films WHERE title LIKE ?");
-        return this._internalExecuteQuery(stmt, `%${title}%`, (row) => {
-            films.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
-        }, films);
+        return this._internalExecuteQuery("SELECT * FROM films WHERE title LIKE ?", `%${title}%`, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
     }
     async addNewFilmToDb(title, favorite, watchDate, score) {
         let lastId = 0;
-        await this._internalExecuteQuery(this.db, "SELECT MAX(id) AS max_id FROM films", (row) => { lastId = row.max_id; }, null);
-        const stmt = this.db.prepare("INSERT INTO films (id, title, favorite, watchdate, rating) VALUES (?, ?, ?, ?, ?)");
-        stmt.run(lastId + 1, title, favorite, watchDate, score, function (err) {
-            if (err) {
-                console.log(`Inserting film ${title} failed: ${err}`);
-            } else {
-                console.log(`Inserted film ${title} with id ${this.lastID}`)
-            }
+        await this._internalExecuteQuery("SELECT MAX(id) AS max_id FROM films", (row, _) => { lastId = row.max_id; }, null);
+        return new Promise((resolve, _) => {
+            this.db.run("INSERT INTO films (id, title, favorite, watchdate, rating) VALUES (?, ?, ?, ?, ?)", lastId + 1, title, favorite, watchDate, score, function (err) {
+                if (err) {
+                    console.log(`Inserting film ${title} failed: ${err}`);
+                    resolve(false);
+                } else {
+                    console.log(`Inserted film ${title} with id ${this.lastID}`)
+                    resolve(true);
+                }
+            })
         });
-        stmt.finalize();
     }
     async deleteFilmFromDb(filmId) {
-        const stmt = this.db.prepare("DELETE FROM films WHERE id = ?");
-        stmt.run(filmId, function (err) {
-            if (err) {
-                console.log(`Deleting film with id ${filmId} failed: ${err}`);
-            } else {
-                console.log(`Deleted film with id ${this.lastID}`)
-            }
+        return new Promise((resolve, _) => {
+            this.db.run("DELETE FROM films WHERE id = ?", filmId, function (err) {
+                if (err) {
+                    console.log(`Deleting film with id ${filmId} failed: ${err}`);
+                    resolve(false);
+                } else {
+                    console.log(`Deleted film with id ${filmId}`)
+                    resolve(true);
+                }
+            })
         });
-        stmt.finalize();
     }
     async resetWatchedFilmsInDb() {
-        const stmt = this.db.prepare("UPDATE films SET watchdate = NULL");
-        stmt.run(function (err) {
-            if (err) {
-                console.log(`Resetting watched films failed: ${err}`);
-            } else {
-                console.log("Resetted watched films");
-            }
+        return new Promise((resolve, _) => {
+            this.db.run("UPDATE films SET watchdate = NULL", function (err) {
+                if (err) {
+                    console.log(`Resetting watched films failed: ${err}`);
+                    resolve(false);
+                } else {
+                    console.log("Resetted watched films");
+                    resolve(true);
+                }
+            })
         });
-        stmt.finalize();
     }
     async close() {
         return new Promise((resolve, reject) => {
