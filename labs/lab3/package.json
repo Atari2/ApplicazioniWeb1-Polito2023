@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "bootstrap-icons": "^1.10.3",
+    "dayjs": "^1.11.7"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "watchify": "^4.0.0"
+  },
+  "scripts": {
+    "build": "browserify src/films.js -o dist/bundle.js",
+    "watch": "live-server"
+  }
+}
