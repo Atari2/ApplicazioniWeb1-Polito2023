@@ -25,6 +25,7 @@ class FilmLibrary {
     }
 }
 
+// TODO: use a proper database
 const filmLibrary = new FilmLibrary();
 filmLibrary.addNewFilm(new Film(1, "Pulp Fiction", true, "March 10, 2023", 5));
 filmLibrary.addNewFilm(new Film(2, "21 Grams", true, "March 17, 2023", 4));
@@ -38,6 +39,17 @@ function createFavouriteCheckbox(film) {
     cb.setAttribute("id", "Favorite");
     cb.setAttribute("type", "checkbox");
     cb.setAttribute("label", "Favorite");
+    cb.addEventListener("change", () => {
+        console.log("Checkbox clicked");
+        let namediv = document.getElementById(`film-cell-${film.id}`);
+        if (cb.checked) {
+            film.favorite = true;
+            namediv.setAttribute("style", "color: red");
+        } else {
+            film.favorite = false;
+            namediv.setAttribute("style", "");
+        }
+    });
     cb.checked = film.favorite;
     let label = document.createElement("label");
     label.setAttribute("for", "Favorite");
@@ -82,6 +94,7 @@ function createFilmsTable(filter_func) {
         let tr = tbody.appendChild(document.createElement("tr"));
         let namediv = document.createElement("div");
         let name = document.createTextNode(film.title);
+        namediv.setAttribute("id", `film-cell-${film.id}`);
         namediv.appendChild(name);
         if (film.favorite !== null && film.favorite) {
             namediv.setAttribute("style", "color: red");
@@ -184,11 +197,11 @@ addEventListener("DOMContentLoaded", () => {
     ham_btn.addEventListener("click", () => {
         console.log("Hamburger menu button clicked");
         let sidebar = document.getElementById("hamnavbar");
-        if (sidebar.getAttribute("style") === "display: block") {
-            sidebar.setAttribute("style", "display: none");
+        if (sidebar.style.display == "block") {
+            sidebar.style.display = "none";
         } else {
             setBtnToActive(all_btn_ham);
-            sidebar.setAttribute("style", "display: block");
+            sidebar.style.display = "block";
         }
     });
 });

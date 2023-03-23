@@ -44,6 +44,8 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        background-color: rgb(52, 113, 205);
+        border-color:rgb(32, 121, 253);
     }
     .filter-list {
         filter: invert(66%) sepia(81%) saturate(476%) hue-rotate(186deg) brightness(100%) contrast(104%);
@@ -97,6 +99,31 @@
 #filmtable {
     border-style: none;
     width: 100%;
+}
+#add-film-form {
+    display: flex;
+    justify-content: space-between;
+    align-items: left;
+    flex-direction: column;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    background-color: rgba(80, 134, 214, 0.9);
+    padding: 2%;
+    border-radius: 5%;
+    border-style: solid;
+    border-color: rgba(45, 76, 123);
+    font-weight: 600;
+}
+.form-input-style {
+    border-style: solid;
+    border-color: rgb(218, 219, 220);
+    border-width: 1px;
+    border-radius: 5px;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
 }
 #filmtable td {
     font-weight: 500;
