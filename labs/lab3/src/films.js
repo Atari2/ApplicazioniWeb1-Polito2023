@@ -116,6 +116,32 @@ function setBtnToActive(btn) {
     btn.setAttribute("class", `${old_class} button-active`);
 }
 
+function addNewFilm() {
+    let title_element = document.getElementById("film-title");
+    let fav_element = document.getElementById("film-fav");
+    let date_element = document.getElementById("film-date");
+    let score_element = document.getElementById("film-rating");
+    let title = title_element.value;
+    let fav = fav_element.checked;
+    let date = date_element.value;
+    let score = parseInt(score_element.value);
+    if (score === 0) {
+        score = null;
+    }
+    if (date === "") {
+        date = null;
+    }
+    if (title === "") {
+        alert("Please enter a title for the film");
+        return;
+    }
+    let new_film = new Film(filmLibrary.films.length + 1, title, fav, date, score);
+    filmLibrary.addNewFilm(new_film);
+    createFilmsTable((_) => true);
+    let modal = document.getElementById("add-film-form");
+    modal.style.display = "none";
+}
+
 addEventListener("DOMContentLoaded", () => {
     createFilmsTable((_) => true);
     let btn = document.getElementById("button-add-film");
@@ -135,11 +161,12 @@ addEventListener("DOMContentLoaded", () => {
     let ham_btn = document.getElementById("ham-menu-button");
 
     let curr_selection = document.getElementById("current-selection");
-    
+    let add_new_film_btn = document.getElementById("submit-new-film-button");
+    add_new_film_btn.addEventListener("click", addNewFilm);
     setBtnToActive(all_btn);
     btn.addEventListener("click", () => {
-        console.log("Add film button clicked");
-        alert("Add film button clicked")
+        let modal = document.getElementById("add-film-form");
+        modal.style.display = "flex";
     });
     all_btn.addEventListener("click", () => {
         setBtnToActive(all_btn);

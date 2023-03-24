@@ -101,19 +101,21 @@
     width: 100%;
 }
 #add-film-form {
-    display: flex;
-    justify-content: space-between;
+    display: none;
+    gap: 0.5em;
     align-items: left;
     flex-direction: column;
     position: fixed;
     top: 30%;
-    left: 50%;
-    background-color: rgba(80, 134, 214, 0.9);
-    padding: 2%;
+    left: 40%;
+    background-color: rgba(80, 134, 214, 0.5);
+    backdrop-filter: blur(5px);
+    padding: 1%;
     border-radius: 5%;
     border-style: solid;
     border-color: rgba(45, 76, 123);
     font-weight: 600;
+    z-index: 2;
 }
 .form-input-style {
     border-style: solid;

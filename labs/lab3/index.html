@@ -64,12 +64,14 @@
         <label for="film-fav">Favorite</label>
         <input class="form-input-style" type="checkbox" id="film-fav">
       </div>
-      <input class="form-input-style" type="number" id="film-rating" placeholder="Rating">
+      <input class="form-input-style" type="number" min="0" max="5" id="film-rating" placeholder="Rating">
       <div>
         <label for="film-date">Watch date</label>
         <input class="form-input-style" type="date" id="film-date" placeholder="Date">
       </div>
-      <input class="form-input-style" type="submit">
+      <button class="form-input-style" type="button" id="submit-new-film-button">
+        Add film
+      </button>
     </form>
   </div>
   <button id="button-add-film" class="btn btn-primary btn-lg" type="button">+</button>
