@@ -81,6 +81,20 @@ function createRating(film) {
     return div;
 }
 
+function resetNewFilmForm(modal) {
+    let elem = document.getElementById("main-page-div");
+    elem.style.filter = "none";
+    modal.style.display = "none";
+    let title_element = document.getElementById("film-title");
+    let fav_element = document.getElementById("film-fav");
+    let date_element = document.getElementById("film-date");
+    let score_element = document.getElementById("film-rating");
+    title_element.value = "";
+    fav_element.checked = false;
+    date_element.value = "";
+    score_element.value = 0;
+}
+
 function createFilmsTable(filter_func) {
     let tbl = document.getElementById("filmtable");
     let tbody_og = document.getElementById("filmtablebody");
@@ -139,10 +153,40 @@ function addNewFilm() {
     filmLibrary.addNewFilm(new_film);
     createFilmsTable((_) => true);
     let modal = document.getElementById("add-film-form");
-    modal.style.display = "none";
+    resetNewFilmForm(modal);
 }
 
 addEventListener("DOMContentLoaded", () => {
+    document.onkeydown = (evt) => {
+        evt = evt || window.event;
+        if (!evt.isTrusted) {
+            return;
+        }
+        let isEscape = false;
+        if ("key" in evt) {
+            isEscape = (evt.key === "Escape" || evt.key === "Esc");
+        }
+        if (isEscape) {
+            let modal = document.getElementById("add-film-form");
+            resetNewFilmForm(modal);
+        }
+    };
+    document.onmousedown = (evt) => {
+        evt = evt || window.event;
+        if (!evt.isTrusted) {
+            return;
+        }
+        let modal = document.getElementById("add-film-form");
+        let btn = document.getElementById("button-add-film");
+        if (evt.target === btn) {
+            return;
+        }
+        if (modal.style.display !== "none") {
+            if (!modal.contains(evt.target)) {
+                resetNewFilmForm(modal);
+            }
+        }
+    };
     createFilmsTable((_) => true);
     let btn = document.getElementById("button-add-film");
     let all_btn = document.getElementById("sidebar-button-all");
@@ -166,15 +210,27 @@ addEventListener("DOMContentLoaded", () => {
     setBtnToActive(all_btn);
     btn.addEventListener("click", () => {
         let modal = document.getElementById("add-film-form");
-        modal.style.display = "flex";
+        let elem = document.getElementById("main-page-div");
+        if (modal.style.display === "flex") {
+            resetNewFilmForm(modal);
+        } else {
+            modal.style.display = "flex";
+            elem.style.filter = "blur(3px)";
+        }
     });
+    window.onresize = () => {
+        let ham_menu = document.getElementById("hamnavbar");
+        if (window.innerWidth > 800 && ham_menu.style.display !== "none") {
+            ham_menu.style.display = "none";
+        }
+    };
     all_btn.addEventListener("click", () => {
         setBtnToActive(all_btn);
         createFilmsTable((_) => true);
         curr_selection.innerHTML = "All";
     });
     all_btn_ham.addEventListener("click", () => {
-        setBtnToActive(all_btn);
+        setBtnToActive(all_btn_ham);
         createFilmsTable((_) => true);
         curr_selection.innerHTML = "All";
     });
@@ -222,7 +278,6 @@ addEventListener("DOMContentLoaded", () => {
         createFilmsTable((film) => film.title.toLowerCase().includes(search_bar.value.toLowerCase()));
     });
     ham_btn.addEventListener("click", () => {
-        console.log("Hamburger menu button clicked");
         let sidebar = document.getElementById("hamnavbar");
         if (sidebar.style.display == "block") {
             sidebar.style.display = "none";
