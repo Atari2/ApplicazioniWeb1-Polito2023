@@ -33,7 +33,7 @@ filmLibrary.addNewFilm(new Film(3, "Star Wars", false));
 filmLibrary.addNewFilm(new Film(4, "Matrix", false));
 filmLibrary.addNewFilm(new Film(5, "Shrek", false, "March 21, 2023", 3));
 
-function createFavouriteCheckbox(film) { 
+function createFavouriteCheckbox(film) {
     let div = document.createElement("div");
     let cb = document.createElement("input");
     cb.setAttribute("id", "Favorite");
