@@ -4,6 +4,7 @@
     "dayjs": "^1.11.7"
   },
   "devDependencies": {
+    "live-server": "^1.2.2",
     "watchify": "^4.0.0",
     "webpack": "^5.76.3",
     "webpack-cli": "^5.0.1"
