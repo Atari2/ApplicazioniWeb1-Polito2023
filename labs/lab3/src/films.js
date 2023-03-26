@@ -223,7 +223,7 @@ addEventListener("DOMContentLoaded", () => {
             resetNewFilmForm(modal);
         } else {
             modal.style.display = "flex";
-            elem.style.filter = "blur(3px)";
+            elem.style.filter = "blur(3px) grayscale(70%) opacity(70%)";
         }
     });
     window.onresize = () => {
