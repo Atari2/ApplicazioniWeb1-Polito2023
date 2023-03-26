@@ -60,13 +60,21 @@ function createFavouriteCheckbox(film) {
     return div;
 }
 
-function createStar(filled) {
+function createStar(filled, film, index) {
     if (!filled) {
         let star = document.createElement("img");
+        star.onclick = () => {
+            film.score = index;
+            createFilmsTable(f => true);
+        };
         star.setAttribute("src", "images/star.svg");
         return star;
     } else {
         let star = document.createElement("img");
+        star.onclick = () => {
+            film.score = index;
+            createFilmsTable(f => true);
+        };
         star.setAttribute("src", "images/star-fill.svg");
         return star;
     }
@@ -76,7 +84,7 @@ function createRating(film) {
     let div = document.createElement("div");
     div.setAttribute("class", "rating");
     for (let i = 1; i <= 5; i++) {
-        div.appendChild(createStar(film.score === null ? false : i <= film.score));
+        div.appendChild(createStar(film.score === null ? false : i <= film.score, film, i));
     }
     return div;
 }

@@ -4,11 +4,12 @@
     "dayjs": "^1.11.7"
   },
   "devDependencies": {
-    "browserify": "^17.0.0",
-    "watchify": "^4.0.0"
+    "watchify": "^4.0.0",
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
   },
   "scripts": {
-    "build": "browserify src/films.js -o dist/bundle.js",
+    "build": "webpack",
     "start": "live-server"
   }
 }
