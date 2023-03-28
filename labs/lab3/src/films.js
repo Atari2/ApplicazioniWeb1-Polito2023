@@ -44,10 +44,10 @@ function createFavouriteCheckbox(film) {
         let namediv = document.getElementById(`film-cell-${film.id}`);
         if (cb.checked) {
             film.favorite = true;
-            namediv.setAttribute("style", "color: red");
+            namediv.style.color = "red";
         } else {
             film.favorite = false;
-            namediv.setAttribute("style", "");
+            namediv.style.color = "";
         }
     });
     cb.checked = film.favorite;
