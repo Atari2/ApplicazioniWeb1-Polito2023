@@ -254,13 +254,13 @@ addEventListener("DOMContentLoaded", () => {
     });
     rat_btn.addEventListener("click", () => {
         setBtnToActive(rat_btn);
-        createFilmsTable((film) => film.score !== null);
-        curr_selection.innerHTML = "Rated";
+        createFilmsTable((film) => film.score === 5);
+        curr_selection.innerHTML = "Best Rated";
     });
     rat_btn_ham.addEventListener("click", () => {
         setBtnToActive(rat_btn_ham);
-        createFilmsTable((film) => film.score !== null);
-        curr_selection.innerHTML = "Rated";
+        createFilmsTable((film) => film.score === 5);
+        curr_selection.innerHTML = "Best Rated";
     });
     seen_btn.addEventListener("click", () => {
         setBtnToActive(seen_btn);
