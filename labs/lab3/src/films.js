@@ -89,6 +89,22 @@ function createRating(film) {
     return div;
 }
 
+function createDeleteButton(film) {
+    let btn = document.createElement("button");
+    btn.className = "btn";
+    let btn_img = document.createElement("img");
+    btn_img.setAttribute("src", "images/trash.svg");
+    btn.appendChild(btn_img);
+    btn.onclick = () => {
+        filmLibrary.films = filmLibrary.films.filter(f => f.id !== film.id);
+        let selected_button = document.getElementsByClassName("button-active")[0];
+        if (selected_button !== undefined) {
+            selected_button.click();
+        }
+    };
+    return btn;
+}
+
 function resetNewFilmForm(modal) {
     let elem = document.getElementById("main-page-div");
     elem.style.filter = "none";
@@ -117,6 +133,9 @@ function createFilmsTable(filter_func) {
         let namediv = document.createElement("div");
         let name = document.createTextNode(film.title);
         namediv.setAttribute("id", `film-cell-${film.id}`);
+        let del_btn = createDeleteButton(film);
+        del_btn.style.paddingBottom = "0.8em";
+        namediv.appendChild(del_btn);
         namediv.appendChild(name);
         if (film.favorite !== null && film.favorite) {
             namediv.setAttribute("style", "color: red");
