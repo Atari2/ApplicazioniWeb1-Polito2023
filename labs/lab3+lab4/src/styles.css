@@ -1,0 +1,251 @@
+/* * {
+    border-color: red !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+} */
+#topnavbar {
+    background-color: rgb(13, 110, 253);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    height: 3.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+#maindiv {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+#rightmenu {
+    width: 80%;
+}
+
+#leftnavbar {
+    width: 18%;
+}
+
+@media screen and (max-width: 800px) {
+    #leftnavbar {
+        display: none;
+    }
+
+    #rightmenu {
+        width: 100%;
+    }
+
+    .hamburger-menu {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: rgb(13, 110, 253);
+        border-color: rgb(32, 121, 253);
+        border-style: solid;
+    }
+
+    #ham-menu-button {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(52, 113, 205);
+        border-color: rgb(32, 121, 253);
+    }
+
+    .filter-list {
+        filter: invert(66%) sepia(81%) saturate(476%) hue-rotate(186deg) brightness(100%) contrast(104%);
+        width: 150%;
+        height: 150%
+    }
+}
+
+@media screen and (min-width: 800px) {
+    #leftnavbar {
+        display: block;
+    }
+
+    #rightmenu {
+        width: 80%;
+    }
+
+    .hamburger-menu {
+        display: none;
+    }
+
+    #ham-menu-button {
+        display: none;
+    }
+}
+
+#hamnavbar {
+    display: none;
+}
+
+#hamnavbar li {
+    list-style-type: none;
+    border-top: rgb(218, 219, 220);
+    border-style: solid none none none;
+    border-width: 1px;
+    height: 3em;
+    padding-top: 0.2em;
+    width: 90%
+}
+
+#hamnavbar ul {
+    background-color: rgb(248, 249, 250);
+    height: 100%;
+}
+
+#leftnavbar li {
+    list-style-type: none;
+    border-top: rgb(218, 219, 220);
+    border-style: solid none none none;
+    border-width: 1px;
+    height: 3em;
+    padding-top: 0.2em;
+    width: 90%
+}
+
+#leftnavbar ul {
+    background-color: rgb(248, 249, 250);
+    height: 100%;
+}
+
+#filmtable {
+    border-style: none;
+    width: 100%;
+}
+
+#add-film-form {
+    display: none;
+    gap: 0.5em;
+    align-items: left;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    top: 30%;
+    left: 40%;
+    background-color: rgba(80, 134, 214, 0.5);
+    backdrop-filter: blur(5px);
+    padding: 1%;
+    border-radius: 5%;
+    border-style: solid;
+    border-color: rgba(45, 76, 123);
+    font-weight: 600;
+    z-index: 2;
+}
+
+#favorite-rating-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+#film-rating {
+    width: 30%;
+}
+
+#film-fav {
+    width: 1em;
+    height: 1em;
+}
+
+.form-input-style {
+    border-style: solid;
+    border-color: rgb(218, 219, 220);
+    border-width: 1px;
+    border-radius: 5px;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+#filmtable td {
+    font-weight: 500;
+    border-style: solid none solid none;
+    border-width: 1px;
+    border-color: rgb(218, 219, 220);
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+#filmtable tr {
+    height: 3em;
+}
+
+#current-selection {
+    padding-bottom: 0.5em;
+}
+
+#button-add-film {
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+    background-color: rgb(13, 110, 253);
+    color: white;
+    border-style: none;
+    border-radius: 50%;
+    text-align: center;
+}
+
+.sidebar-button {
+    border-style: none;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    font-weight: 500;
+    background-color: transparent;
+}
+
+.sidebar-button.button-active {
+    background-color: rgb(5, 92, 157);
+    color: white;
+}
+
+.filter-white {
+    filter: invert(100%);
+    padding-left: 1em;
+    padding-right: 0.5em;
+    padding-top: 0.3em;
+    height: 60%;
+}
+
+.filter-light-blue {
+    filter: invert(73%) sepia(5%) saturate(4881%) hue-rotate(186deg) brightness(102%) contrast(99%);
+    height: 80%;
+}
+
+.left-header-panel {
+    font-size: larger;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 33%;
+}
+
+.right-header-panel {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    width: 33%;
+}
+
+.center-header-panel {
+    display: flex;
+    justify-content: left;
+    width: 33%;
+}
+
+.my-search-bar {
+    border-style: solid;
+    border-radius: 5px;
+    width: 40vw;
+}
