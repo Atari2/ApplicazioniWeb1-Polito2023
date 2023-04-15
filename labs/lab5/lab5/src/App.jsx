@@ -38,7 +38,7 @@ const filmLibrary = new FilmLibrary();
 const selectors = {
     "A": { index: 0, func: (_) => true, fullname: "All" },
     "FV": { index: 1, func: (film) => film.favorite, fullname: "Favorites" },
-    "BR": { index: 2, func: (film) => film.score !== null && film.score >= 4, fullname: "Best Rated" },
+    "BR": { index: 2, func: (film) => film.score !== null && film.score >= 5, fullname: "Best Rated" },
     "SLM": { index: 3, func: (film) => film.watchDate !== null && film.watchDate.isAfter(dayjs().subtract(1, 'month')), fullname: "Seen Last Month" },
     "U": { index: 4, func: (film) => film.watchDate === null, fullname: "Unseen" }
 };
