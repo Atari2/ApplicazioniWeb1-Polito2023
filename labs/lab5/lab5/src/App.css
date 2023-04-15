@@ -6,6 +6,16 @@
 .filter-white {
     filter: invert(100%);
 }
+@media screen and (max-width: 800px) {
+    .hide-on-small-screen {
+        display: none !important;
+    }
+}
+@media screen and (min-width: 800px) {
+    .hide-on-large-screen {
+        display: none !important;
+    }
+}
 .full-height {
     height: 100%;
 }

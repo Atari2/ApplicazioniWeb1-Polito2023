@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Col, Container, Row, Button, Form, Table, ListGroup, Navbar, Nav, InputGroup, Modal } from 'react-bootstrap';
+import { Col, Container, Row, Button, Form, Table, ListGroup, Navbar, Nav, InputGroup, Modal, Offcanvas } from 'react-bootstrap';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import fillStar from './assets/star-fill.svg';
@@ -50,16 +50,19 @@ filmLibrary.addNewFilm(new Film(5, "Shrek", false, "March 21, 2023", 3));
 
 function MyHeader(props) {
     const onSearch = props.onSearch;
-
+    const setShowOffcanvas = props.setShowOffcanvas;
     return (
         <header>
-            <Navbar expand="lg" className="navbar-dark bg-primary">
+            <Navbar className="navbar-dark bg-primary">
                 <Container fluid className="d-flex justify-content-between">
                     <Navbar.Brand className="p-2 d-flex">
-                        <img style={{ width: "1.7em", height: "1.7em" }} className="filter-white img-fluid p-2" src={collectionplay} />
-                        Film Library
+                        <img style={{ width: "1.7em", height: "1.7em" }} className="hide-on-small-screen filter-white img-fluid p-2" src={collectionplay} />
+                        <Container className="hide-on-small-screen">Film Library</Container>
+                        <Button onClick={() => setShowOffcanvas(true)} className="hide-on-large-screen" style={{backgroundColor: "rgb(9, 76, 176)"}}>
+                            <span className="navbar-toggler-icon"></span>
+                        </Button>
                     </Navbar.Brand>
-                    <Container fluid className="d-flex flex-fill justify-content-center">
+                    <Container fluid className="d-flex flex-fill justify-content-center hide-on-small-screen">
                         <input
                             className="form-control me-2"
                             style={{ width: "30%" }}
@@ -69,6 +72,9 @@ function MyHeader(props) {
                             onInput={(e) => onSearch(e.target.value)}
                         />
                     </Container>
+                    <Navbar.Brand className="p-2 d-flex">
+                        <Container className="hide-on-large-screen">Film Library</Container>
+                    </Navbar.Brand>
                     <Nav className="p-2">
                         <Nav.Item>
                             <img style={{ width: "2.2em", height: "2.2em" }} className="filter-white img-fluid" src={person_circle} />
@@ -289,19 +295,32 @@ function FilterSelector(props) {
 
 function Main(props) {
     const [filter, setFilter] = useState(() => selectors.A);
+    const show = props.showOffcanvas;
+    const setShow = props.setShowOffcanvas;
+
     const updateFilter = (filter) => {
         setFilter((_) => {
             return filter;
         })
     };
 
+    const handleClose = () => setShow(false);
+
     return (
         <Container fluid className="full-height">
             <Row className="full-height">
-                <Col xs={3} className="color-grey">
+                <Col xs={3} className="color-grey hide-on-small-screen">
                     <FilterSelector currentFilter={filter} onFilterChange={updateFilter} />
                 </Col>
-                <Col xs={9}>
+                <Offcanvas show={show} onHide={handleClose}>
+                    <Offcanvas.Header closeButton>
+                        <Offcanvas.Title>Filters</Offcanvas.Title>
+                    </Offcanvas.Header>
+                    <Offcanvas.Body>
+                        <FilterSelector currentFilter={filter} onFilterChange={updateFilter} />
+                    </Offcanvas.Body>
+                </Offcanvas>
+                <Col>
                     <h1>{filter.fullname}</h1>
                     <MyTable listOfFilms={props.films} setFilms={props.setFilms} filter={filter} searchTerm={props.searchTerm} />
                 </Col>
@@ -313,6 +332,7 @@ function Main(props) {
 function App() {
     const [searchTerm, setSearchTerm] = useState(() => null);
     const [films, setFilms] = useState(() => filmLibrary.films);
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
     const updateSearchTerm = (term) => {
         setSearchTerm((_) => {
             return term;
@@ -325,8 +345,8 @@ function App() {
     };
     return (
         <Container fluid className="p-0 full-viewport">
-            <MyHeader onSearch={updateSearchTerm} />
-            <Main searchTerm={searchTerm} films={films} setFilms={setFilms}/>
+            <MyHeader onSearch={updateSearchTerm} setShowOffcanvas={setShowOffcanvas}/>
+            <Main searchTerm={searchTerm} films={films} setFilms={setFilms} showOffcanvas={showOffcanvas} setShowOffcanvas={setShowOffcanvas}/>
             <MyFooter addFilmCallback={addFilmCallback}/>
         </Container>
     )
