@@ -22,13 +22,6 @@
     bottom: 1em;
     right: 1em;
 }
-.fixed-center {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-}
 .color-grey {
     background-color: rgb(248, 249, 250);
 }

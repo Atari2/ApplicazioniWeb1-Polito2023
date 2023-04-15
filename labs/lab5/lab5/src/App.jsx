@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Col, Container, Row, Button, Form, Table, ListGroup, Navbar, Nav, InputGroup } from 'react-bootstrap';
+import { Col, Container, Row, Button, Form, Table, ListGroup, Navbar, Nav, InputGroup, Modal } from 'react-bootstrap';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import fillStar from './assets/star-fill.svg';
@@ -81,10 +81,16 @@ function MyHeader(props) {
 }
 
 function AddFilmForm(props) {
-    const hidden = props.hidden;
+    const show = props.show;
+    const onHide = props.onHide;
     const [validated, setValidated] = useState(false);
     const addFilmCallback = props.addFilmCallback;
-    
+
+    const handleHide = () => {
+        setValidated(false);
+        onHide();
+    };
+
     const handleSubmit = (event) => {
         const form = event.currentTarget;
         if (form.checkValidity() === false) {
@@ -92,48 +98,56 @@ function AddFilmForm(props) {
             event.stopPropagation();
         } else {
             event.preventDefault();
-            const newFilm = new Film(0, form.elements["new-film-title"].value, form.elements["new-film-fav"].checked, form.elements["new-film-watch-date"].value, form.elements["new-film-rating"].value);
+            const new_date = form.elements["new-film-watch-date"].value === "" ? null : form.elements["new-film-watch-date"].value;
+            const newFilm = new Film(0, form.elements["new-film-title"].value, form.elements["new-film-fav"].checked, new_date, form.elements["new-film-rating"].value);
             addFilmCallback(newFilm);
             form.reset();
         }
         setValidated(true);
     };
-    if (hidden) {
-        return null;
-    }
     return (
-        <Form className="fixed-center" noValidate validated={validated} onSubmit={handleSubmit}>
-            <Form.Control className="mb-2" type="input" id="new-film-title" placeholder="Film title" required></Form.Control>
-            <InputGroup className="mb-3">
-                <Form.Control type="number" min="0" max="5" id="new-film-rating" placeholder="Rating (1-5)"></Form.Control>
-                <InputGroup.Checkbox label="Favorite" id="new-film-fav" aria-label="Favorite"/>
-            </InputGroup>
-            <Form.Control className="mb-2" id="new-film-watch-date" type="date"></Form.Control>
-            <Form.Control.Feedback type="invalid">
-                Please enter a film title.
-            </Form.Control.Feedback>
-            <Button type="submit" variant="primary">Add new film</Button>
-        </Form>
+        <Modal show={show} onHide={handleHide}>
+            <Modal.Header closeButton>
+                <Modal.Title>Add new film</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form className="p-2 pb-0" noValidate validated={validated} onSubmit={handleSubmit}>
+                    <Form.Control className="mb-2" type="input" id="new-film-title" placeholder="Film title" required></Form.Control>
+                    <InputGroup className="mb-3">
+                        <Form.Control type="number" min="0" max="5" id="new-film-rating" placeholder="Rating (1-5)"></Form.Control>
+                        <InputGroup.Checkbox label="Favorite" id="new-film-fav" aria-label="Favorite"/>
+                    </InputGroup>
+                    <Form.Control className="mb-2" id="new-film-watch-date" type="date"></Form.Control>
+                    <Form.Control.Feedback type="invalid">
+                        Please enter a film title.
+                    </Form.Control.Feedback>
+                    <Container fluid className="d-flex justify-content-evenly pt-2">
+                        <Button variant="secondary" onClick={handleHide}>Close</Button>
+                        <Button type="submit" variant="primary">Add new film</Button>
+                    </Container>
+                </Form>
+            </Modal.Body>
+        </Modal>
     )
 }
 
 function MyFooter(props) {
     const addFilmCallback = props.addFilmCallback;
-    const [showAddFilmForm, setShowAddFilmForm] = useState(true);
+    const [show, setShow] = useState(false);
+
+    
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(!show);
 
     const addFilmCallbackAdder = (film) => {
         addFilmCallback(film);
-        toggleAddFilmForm();
-    };
-
-    const toggleAddFilmForm = () => {
-        setShowAddFilmForm(!showAddFilmForm);
+        handleClose();
     };
 
     return (
         <Container>
-            <AddFilmForm addFilmCallback={addFilmCallbackAdder} hidden={showAddFilmForm}/>
-            <Button variant="primary" className="btn-lg round-button fixed-bottom-right" onClick={ () => toggleAddFilmForm() }>&#xFF0B;</Button>
+            <AddFilmForm addFilmCallback={addFilmCallbackAdder} show={show} onHide={handleClose}/>
+            <Button variant="primary" className="btn-lg round-button fixed-bottom-right" onClick={ () => handleShow() }>&#xFF0B;</Button>
         </Container>
     );
 }
@@ -305,7 +319,6 @@ function App() {
         });
     };
     const addFilmCallback = (film) => {
-        console.log(`Adding film ${film.toString()}`)
         setFilms((oldList) => {
             return [...oldList, {...film, id: oldList.length + 1}];
         });
