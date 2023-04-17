@@ -53,7 +53,7 @@ function MyHeader(props) {
     const setShowOffcanvas = props.setShowOffcanvas;
     return (
         <header>
-            <Navbar className="navbar-dark bg-primary">
+            <Navbar variant="dark" bg="primary">
                 <Container fluid className="d-flex justify-content-between">
                     <Navbar.Brand className="p-2 d-flex">
                         <img style={{ width: "1.7em", height: "1.7em" }} className="hide-on-small-screen filter-white img-fluid p-2" src={collectionplay} />
@@ -198,8 +198,7 @@ function MyRow(props) {
             </td>
             <td>
                 <div>
-                    <input type="checkbox" defaultChecked={film.favorite} id="Favorite" label="Favorite" onClick={() => updateFavourite()} />
-                    <label htmlFor="Favorite">Favorite</label>
+                    <Form.Check type="checkbox" label="Favorite" checked={film.favorite} onChange={updateFavourite} />
                 </div>
             </td>
             <td>
@@ -331,7 +330,7 @@ function Main(props) {
 
 function App() {
     const [searchTerm, setSearchTerm] = useState(() => null);
-    const [films, setFilms] = useState(() => filmLibrary.films);
+    const [films, setFilms] = useState(filmLibrary.films);
     const [showOffcanvas, setShowOffcanvas] = useState(false);
     const updateSearchTerm = (term) => {
         setSearchTerm((_) => {
