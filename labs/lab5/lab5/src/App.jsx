@@ -10,8 +10,8 @@ import collectionplay from './assets/collection-play.svg';
 import './App.css';
 
 class Film {
-    constructor(id, title, favorite = false, watchDate = null, score = null) {
-        this.id = id;
+    constructor(title, favorite = false, watchDate = null, score = null) {
+        this.id = FilmLibrary.getNewId();
         this.title = title;
         this.favorite = favorite;
         this.watchDate = watchDate === null ? null : dayjs(watchDate);
@@ -23,6 +23,7 @@ class Film {
 
 }
 class FilmLibrary {
+    static lastID = 0;
     constructor() {
         this.films = [];
     }
@@ -32,21 +33,43 @@ class FilmLibrary {
     print() {
         this.films.forEach(film => console.log(film.toString()));
     }
+    static from(films) {
+        const filmLibrary = new FilmLibrary();
+        films.forEach(film => filmLibrary.addNewFilm(film));
+        return filmLibrary;
+    }
+    static getNewId() {
+        FilmLibrary.lastID++;
+        return FilmLibrary.lastID;
+    }
+}
+
+class Filter {
+    constructor(name, func) {
+        this.name = name;
+        this.func = func;
+    }
+    toString() {
+        return `Filter(name: ${this.name}, func: ${this.func})`;
+    }
+    apply(arrayLike) {
+        return Array.prototype.filter.call(arrayLike, this.func)
+    }
 }
 
 const filmLibrary = new FilmLibrary();
 const selectors = {
-    "A": { index: 0, func: (_) => true, fullname: "All" },
-    "FV": { index: 1, func: (film) => film.favorite, fullname: "Favorites" },
-    "BR": { index: 2, func: (film) => film.score !== null && film.score >= 5, fullname: "Best Rated" },
-    "SLM": { index: 3, func: (film) => film.watchDate !== null && film.watchDate.isAfter(dayjs().subtract(1, 'month')), fullname: "Seen Last Month" },
-    "U": { index: 4, func: (film) => film.watchDate === null, fullname: "Unseen" }
+    ALL:  new Filter("All", (_) => true),
+    FAVORITE: new Filter("Favorites", (film) => film.favorite),
+    BEST_RATER: new Filter("Best Rated", (film) => film.score >= 5),
+    SEEN_LAST_MONTH: new Filter("Seen Last Month", (film) => film.watchDate !== null && film.watchDate.isAfter(dayjs().subtract(1, 'month'))),
+    UNSEEN: new Filter("Unseen", (film) => film.watchDate === null)
 };
-filmLibrary.addNewFilm(new Film(1, "Pulp Fiction", true, "March 10, 2023", 5));
-filmLibrary.addNewFilm(new Film(2, "21 Grams", true, "March 17, 2023", 4));
-filmLibrary.addNewFilm(new Film(3, "Star Wars", false));
-filmLibrary.addNewFilm(new Film(4, "Matrix", false));
-filmLibrary.addNewFilm(new Film(5, "Shrek", false, "March 21, 2023", 3));
+filmLibrary.addNewFilm(new Film("Pulp Fiction", true, "March 10, 2023", 5));
+filmLibrary.addNewFilm(new Film("21 Grams", true, "March 17, 2023", 4));
+filmLibrary.addNewFilm(new Film("Star Wars", false));
+filmLibrary.addNewFilm(new Film("Matrix", false));
+filmLibrary.addNewFilm(new Film("Shrek", false, "March 21, 2023", 3));
 
 function MyHeader(props) {
     const onSearch = props.onSearch;
@@ -105,7 +128,7 @@ function AddFilmForm(props) {
         } else {
             event.preventDefault();
             const new_date = form.elements["new-film-watch-date"].value === "" ? null : form.elements["new-film-watch-date"].value;
-            const newFilm = new Film(0, form.elements["new-film-title"].value, form.elements["new-film-fav"].checked, new_date, form.elements["new-film-rating"].value);
+            const newFilm = new Film(form.elements["new-film-title"].value, form.elements["new-film-fav"].checked, new_date, form.elements["new-film-rating"].value);
             addFilmCallback(newFilm);
             form.reset();
         }
@@ -214,35 +237,35 @@ function MyRow(props) {
 }
 
 function MyTable(props) {
-    const list = props.listOfFilms;
-    const setList = props.setFilms;
+    const library = props.library;
+    const updateLibrary = props.updateLibrary;
     const searchTerm = props.searchTerm;
     const deleteRow = (id) => {
-        setList((oldList) => {
-            return oldList.filter((film) => film.id !== id);
+        updateLibrary((oldLibrary) => {
+            return FilmLibrary.from(oldLibrary.films.filter((film) => film.id !== id));
         });
     }
     const updateFavouriteFilm = (id) => {
-        setList((oldList) => {
-            return oldList.map((film) => {
+        updateLibrary((oldLibrary) => {
+            return FilmLibrary.from(oldLibrary.films.map((film) => {
                 if (film.id === id) {
                     return { ...film, favorite: !film.favorite };
                 } else {
                     return film;
                 }
-            });
+            }));
         })
     };
 
     const updateScoreFilm = (id, score) => {
-        setList((oldList) => {
-            return oldList.map((film) => {
+        updateLibrary((oldLibrary) => {
+            return FilmLibrary.from(oldLibrary.films.map((film) => {
                 if (film.id === id) {
                     return { ...film, score: score };
                 } else {
                     return film;
                 }
-            });
+            }));
         })
     };
 
@@ -257,7 +280,7 @@ function MyTable(props) {
         <Table>
             {/* <Table striped bordered hover> */}
             <tbody>
-                {list.filter(filterBySearch).filter(props.filter.func).map((film) =>
+                {props.filter.apply(library.films.filter(filterBySearch)).map((film) =>
                     <MyRow film={film} key={film.id} 
                         deleteHandler={() => deleteRow(film.id)} 
                         updateFavouriteHandler={() => updateFavouriteFilm(film.id)}
@@ -273,13 +296,13 @@ function FilterSelector(props) {
     const onFilterChange = props.onFilterChange;
 
     const makeListItem = (selector) => {
-        if (selector.index === props.currentFilter.index) {
-            return <ListGroup.Item key={selector.fullname} className="color-grey" action active onClick={() => onFilterChange(selector)}>
-                {selector.fullname}
+        if (selector.name === props.currentFilter.name) {
+            return <ListGroup.Item key={selector.name} className="color-grey" action active onClick={() => onFilterChange(selector)}>
+                {selector.name}
             </ListGroup.Item>
         } else {
-            return <ListGroup.Item key={selector.fullname} className="color-grey" action onClick={() => onFilterChange(selector)}>
-                {selector.fullname}
+            return <ListGroup.Item key={selector.name} className="color-grey" action onClick={() => onFilterChange(selector)}>
+                {selector.name}
             </ListGroup.Item>
         }
     };
@@ -293,15 +316,9 @@ function FilterSelector(props) {
 
 
 function Main(props) {
-    const [filter, setFilter] = useState(() => selectors.A);
+    const [filter, setFilter] = useState(selectors.ALL);
     const show = props.showOffcanvas;
     const setShow = props.setShowOffcanvas;
-
-    const updateFilter = (filter) => {
-        setFilter((_) => {
-            return filter;
-        })
-    };
 
     const handleClose = () => setShow(false);
 
@@ -309,19 +326,19 @@ function Main(props) {
         <Container fluid className="full-height">
             <Row className="full-height">
                 <Col xs={3} className="color-grey hide-on-small-screen">
-                    <FilterSelector currentFilter={filter} onFilterChange={updateFilter} />
+                    <FilterSelector currentFilter={filter} onFilterChange={setFilter} />
                 </Col>
                 <Offcanvas show={show} onHide={handleClose}>
                     <Offcanvas.Header closeButton>
                         <Offcanvas.Title>Filters</Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body>
-                        <FilterSelector currentFilter={filter} onFilterChange={updateFilter} />
+                        <FilterSelector currentFilter={filter} onFilterChange={setFilter} />
                     </Offcanvas.Body>
                 </Offcanvas>
                 <Col>
-                    <h1>{filter.fullname}</h1>
-                    <MyTable listOfFilms={props.films} setFilms={props.setFilms} filter={filter} searchTerm={props.searchTerm} />
+                    <h1>{filter.name}</h1>
+                    <MyTable library={props.library} updateLibrary={props.updateLibrary} filter={filter} searchTerm={props.searchTerm} />
                 </Col>
             </Row>
         </Container>
@@ -330,22 +347,17 @@ function Main(props) {
 
 function App() {
     const [searchTerm, setSearchTerm] = useState(() => null);
-    const [films, setFilms] = useState(filmLibrary.films);
+    const [library, updateLibrary] = useState(filmLibrary);
     const [showOffcanvas, setShowOffcanvas] = useState(false);
-    const updateSearchTerm = (term) => {
-        setSearchTerm((_) => {
-            return term;
-        });
-    };
     const addFilmCallback = (film) => {
-        setFilms((oldList) => {
-            return [...oldList, {...film, id: oldList.length + 1}];
+        updateLibrary((oldLibrary) => {
+            return FilmLibrary.from([...oldLibrary.films, film]);
         });
     };
     return (
         <Container fluid className="p-0 full-viewport">
-            <MyHeader onSearch={updateSearchTerm} setShowOffcanvas={setShowOffcanvas}/>
-            <Main searchTerm={searchTerm} films={films} setFilms={setFilms} showOffcanvas={showOffcanvas} setShowOffcanvas={setShowOffcanvas}/>
+            <MyHeader style={{height: "100%"}} onSearch={setSearchTerm} setShowOffcanvas={setShowOffcanvas}/>
+            <Main searchTerm={searchTerm} library={library} updateLibrary={updateLibrary} showOffcanvas={showOffcanvas} setShowOffcanvas={setShowOffcanvas}/>
             <MyFooter addFilmCallback={addFilmCallback}/>
         </Container>
     )
