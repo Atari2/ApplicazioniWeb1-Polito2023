@@ -115,6 +115,15 @@ function AddFilmForm(props) {
     const [validated, setValidated] = useState(false);
     const addFilmCallback = props.addFilmCallback;
 
+    const [filmName, setFilmName] = useState("");
+    const [filmFavorite, setFilmFavourite] = useState(false);
+    const [filmWatchDate, setFilmDate] = useState(null);
+    const [filmRating, setFilmRating] = useState("");
+
+    const wrapSetter = (setter) => {
+        return (event) => { setter(event.target.value); }
+    };
+
     const handleHide = () => {
         setValidated(false);
         onHide();
@@ -127,8 +136,7 @@ function AddFilmForm(props) {
             event.stopPropagation();
         } else {
             event.preventDefault();
-            const new_date = form.elements["new-film-watch-date"].value === "" ? null : form.elements["new-film-watch-date"].value;
-            const newFilm = new Film(form.elements["new-film-title"].value, form.elements["new-film-fav"].checked, new_date, form.elements["new-film-rating"].value);
+            const newFilm = new Film(filmName, filmFavorite, filmWatchDate === "" ? null : filmWatchDate, filmRating);
             addFilmCallback(newFilm);
             form.reset();
         }
@@ -141,12 +149,12 @@ function AddFilmForm(props) {
             </Modal.Header>
             <Modal.Body>
                 <Form className="p-2 pb-0" noValidate validated={validated} onSubmit={handleSubmit}>
-                    <Form.Control className="mb-2" type="input" id="new-film-title" placeholder="Film title" required></Form.Control>
+                    <Form.Control className="mb-2" type="input" onChange={wrapSetter(setFilmName)} placeholder="Film title" required></Form.Control>
                     <InputGroup className="mb-3">
-                        <Form.Control type="number" min="0" max="5" id="new-film-rating" placeholder="Rating (1-5)"></Form.Control>
-                        <InputGroup.Checkbox label="Favorite" id="new-film-fav" aria-label="Favorite"/>
+                        <Form.Control type="number" min="0" max="5" onChange={wrapSetter(setFilmRating)} placeholder="Rating (1-5)"></Form.Control>
+                        <InputGroup.Checkbox label="Favorite" onChange={wrapSetter(setFilmFavourite)} aria-label="Favorite"/>
                     </InputGroup>
-                    <Form.Control className="mb-2" id="new-film-watch-date" type="date"></Form.Control>
+                    <Form.Control className="mb-2" onChange={wrapSetter(setFilmDate)} type="date"></Form.Control>
                     <Form.Control.Feedback type="invalid">
                         Please enter a film title.
                     </Form.Control.Feedback>
