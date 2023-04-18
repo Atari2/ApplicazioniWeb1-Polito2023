@@ -364,7 +364,7 @@ function App() {
     };
     return (
         <Container fluid className="p-0 full-viewport">
-            <MyHeader style={{height: "100%"}} onSearch={setSearchTerm} setShowOffcanvas={setShowOffcanvas}/>
+            <MyHeader className="full-height" onSearch={setSearchTerm} setShowOffcanvas={setShowOffcanvas}/>
             <Main searchTerm={searchTerm} library={library} updateLibrary={updateLibrary} showOffcanvas={showOffcanvas} setShowOffcanvas={setShowOffcanvas}/>
             <MyFooter addFilmCallback={addFilmCallback}/>
         </Container>
