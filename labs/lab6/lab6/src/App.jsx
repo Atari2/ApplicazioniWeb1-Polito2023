@@ -114,9 +114,9 @@ function MyHeader(props) {
 }
 
 function AddFilmForm(props) {
-    const show = props.show;
     const onHide = props.onHide;
     const [validated, setValidated] = useState(false);
+    const addFilmCallback = props.addFilmCallback;
 
     const [filmName, setFilmName] = useState("");
     const [filmFavorite, setFilmFavourite] = useState(false);
@@ -146,7 +146,7 @@ function AddFilmForm(props) {
         setValidated(true);
     };
     return (
-        <Modal show={show} onHide={handleHide}>
+        <Modal show onHide={handleHide}>
             <Modal.Header closeButton>
                 <Modal.Title>Add new film</Modal.Title>
             </Modal.Header>
@@ -271,13 +271,12 @@ function MyFooter(props) {
 
     if (show) {
         return (<Container>
-            <AddFilmForm addFilmCallback={addFilmCallbackAdder} show={show} onHide={handleClose}/>
+            <AddFilmForm addFilmCallback={addFilmCallbackAdder} onHide={handleClose}/>
         </Container>
         );
     } else {
         return (
             <Container>
-                <AddFilmForm addFilmCallback={addFilmCallbackAdder} show={show} onHide={handleClose}/>
                 <Button variant="primary" className="btn-lg round-button fixed-bottom-right" onClick={ () => handleShow() }>&#xFF0B;</Button>
             </Container>
         );
