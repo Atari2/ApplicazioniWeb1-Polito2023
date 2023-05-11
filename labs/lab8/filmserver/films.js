@@ -1,0 +1,143 @@
+const dayjs = require("dayjs");
+const sqlite3 = require("sqlite3");
+class Film {
+    constructor(id, title, favorite = false, watchDate = null, score = null) {
+        this.id = id;
+        this.title = title;
+        this.favorite = Boolean(favorite);
+        this.watchDate = watchDate === null ? null : dayjs(watchDate);
+        this.score = score;
+    }
+    toString() {
+        return `Film(id: ${this.id}, title: ${this.title}, favorite: ${this.favorite}, watch date: ${this.watchDate === null ? "<not watched>" : this.watchDate.format('MMMM DD, YYYY')}, score: ${this.score === null ? "<not assigned>" : this.score})`;
+    }
+}
+class FilmLibrary {
+    constructor(db_name) {
+        this.films = [];
+        this.db = new sqlite3.Database(db_name);
+    }
+    async _internalExecuteQuery(...params) {
+        if (params.length < 2) throw new Error("Invalid number of parameters");
+        const resolve_object = params.pop();
+        const callback = params.pop();
+        return new Promise((resolve, reject) => {
+            this.db.each(...params, function (err, row) {
+                if (err) reject(err);
+                if (typeof row === "undefined") return;
+                callback(row, resolve_object);
+            }, function (err, _) {
+                if (err) reject(err);
+                resolve(resolve_object);
+            })
+        });
+    }
+    async getAllFromDb() {
+        return this._internalExecuteQuery("SELECT * FROM films", (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async getFilmFromDb(filmId) {
+        const nRows = await this._internalExecuteQuery("SELECT COUNT(*) AS n_rows FROM films WHERE id = ?", filmId, (row, obj) => {
+            Object.assign(obj, row);
+        }, {});
+
+        if (nRows.n_rows === 0) throw new Error(`Film with id ${filmId} not found`);
+
+        return this._internalExecuteQuery("SELECT * FROM films WHERE id = ?", filmId, (row, obj) => {
+            Object.assign(obj, new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, {});
+    }
+    async getFavouriteFromDb() {
+        return this._internalExecuteQuery("SELECT * FROM films WHERE favorite = 1", (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async getWatchedLastMonthFromDb() {
+        return this._internalExecuteQuery("select * from films where DATE(watchdate) BETWEEN date('now', 'start of month', '-1 month') AND date('now', 'start of month', '-1 day')", (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async getWatchedBeforeFromDb(date) {
+        if (typeof date === "string") date = dayjs(date);
+        const fmt_date_string = date.format('YYYY-MM-DD');
+        return this._internalExecuteQuery("SELECT * FROM films WHERE watchdate < ?", fmt_date_string, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async getRatedAtLeastFromDb(rating) {
+        return this._internalExecuteQuery("SELECT * FROM films WHERE rating >= ?", rating, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async getTitleLikeFromDb(title) {
+        return this._internalExecuteQuery("SELECT * FROM films WHERE title LIKE ?", `%${title}%`, (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async getUnseenFromDb() {
+        return this._internalExecuteQuery("SELECT * FROM films WHERE watchdate IS NULL", (row, obj) => {
+            obj.push(new Film(row.id, row.title, row.favorite, row.watchdate, row.rating));
+        }, []);
+    }
+    async addNewFilmToDb(title, favorite, watchDate, score) {
+        let lastId = 0;
+        const filmUser = 1; // this field is not used yet
+        await this._internalExecuteQuery("SELECT MAX(id) AS max_id FROM films", (row, _) => { lastId = row.max_id; }, null);
+        return new Promise((resolve, reject) => {
+            this.db.run("INSERT INTO films (id, title, favorite, watchdate, rating, user) VALUES (?, ?, ?, ?, ?, ?)", lastId + 1, title, favorite, watchDate, score, filmUser, function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(lastId + 1);
+                }
+            })
+        });
+    }
+    async modifyFilmFromDb(filmId, title, favorite, watchDate, score) {
+        const nRows = await this._internalExecuteQuery("SELECT COUNT(*) AS n_rows FROM films WHERE id = ?", filmId, (row, obj) => {
+            Object.assign(obj, row);
+        }, {});
+
+        if (nRows.n_rows === 0) throw new Error(`Film with id ${filmId} not found`);
+
+        if (typeof watchDate === "string") watchDate = dayjs(watchDate);
+
+        return new Promise((resolve, reject) => {
+            this.db.run("UPDATE films SET title = ?, favorite = ?, watchdate = ?, rating = ? WHERE id = ?", title, favorite, watchDate.format('YYYY-MM-DD'), score, filmId, function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(filmId);
+                }
+            })
+        });
+    }
+    async deleteFilmFromDb(filmId) {
+        const nRows = await this._internalExecuteQuery("SELECT COUNT(*) AS n_rows FROM films WHERE id = ?", filmId, (row, obj) => {
+            Object.assign(obj, row);
+        }, {});
+
+        if (nRows.n_rows === 0) throw new Error(`Film with id ${filmId} not found`);
+        
+        return new Promise((resolve, reject) => {
+            this.db.run("DELETE FROM films WHERE id = ?", filmId, function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(filmId);
+                }
+            })
+        });
+    }
+    async close() {
+        return new Promise((resolve, reject) => {
+            this.db.close(err => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+}
+
+module.exports = FilmLibrary;

@@ -1,0 +1,70 @@
+GET http://localhost:3000/api/films HTTP/1.1
+###
+GET http://localhost:3000/api/films/1 HTTP/1.1
+###
+GET http://localhost:3000/api/films/100 HTTP/1.1
+###
+GET http://localhost:3000/api/films/filter/all HTTP/1.1
+###
+GET http://localhost:3000/api/films/filter/favorites HTTP/1.1
+###
+GET http://localhost:3000/api/films/filter/best-rated HTTP/1.1
+###
+GET http://localhost:3000/api/films/filter/seen-last-month HTTP/1.1
+###
+GET http://localhost:3000/api/films/filter/unseen HTTP/1.1
+###
+GET http://localhost:3000/api/films/filter/asdf HTTP/1.1
+###
+POST http://localhost:3000/api/films
+Content-Type: application/json
+
+{
+    "title": "new film",
+    "favorite": true,
+    "score": 5,
+    "watchDate": "2020-01-01"
+}
+###
+PUT http://localhost:3000/api/films/7
+Content-Type: application/json
+
+{
+    "title": "Interstellar",
+    "favorite": true,
+    "score": 4,
+    "watchDate": "2023-05-10"
+}
+###
+PUT http://localhost:3000/api/films/8
+Content-Type: application/json
+
+{
+    "title": "Interstellar",
+    "favorite": true,
+    "score": 4,
+    "watchDate": "2023-05-10"
+}
+###
+PUT http://localhost:3000/api/films/7/rate
+Content-Type: application/json
+
+{
+    "score": 5
+}
+###
+PUT http://localhost:3000/api/films/7/favorite
+Content-Type: application/json
+
+{
+    "is": true
+}
+###
+PUT http://localhost:3000/api/films/7/favorite
+Content-Type: application/json
+
+{
+    "is": false
+}
+###
+DELETE http://localhost:3000/api/films/8
