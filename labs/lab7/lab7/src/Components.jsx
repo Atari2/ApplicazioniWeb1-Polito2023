@@ -134,6 +134,16 @@ function ModifyFilmForm() {
     const intFilmId = parseInt(filmId);
     const { library, updateLibrary } = useContext(LibraryContext);
     const film = library.getFilmById(intFilmId);
+    if (isNaN(intFilmId) || film === undefined) {
+        return <>
+            <h1>Invalid film id</h1>
+            <Link to="/">
+                <Button className="btn-sm" variant="primary">
+                    Back to home
+                </Button>
+            </Link>
+        </>
+    }
     const navigate = useNavigate();
     let filmTitle = film.title;
     let filmFavorite = film.favorite;
