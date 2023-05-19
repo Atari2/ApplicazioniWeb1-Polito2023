@@ -284,9 +284,6 @@ function MyRow(props) {
                         <img src={trash} className="filter-white align-center" style={{ paddingBottom: "0.2em" }} />
                     </Button>
                     {' '}
-                    <Routes>
-
-                    </Routes>
                     <Link to={`/modify/${film.id}`}>
                         <Button className="btn-sm" variant="primary">
                             <img src={pencil} className="filter-white align-center" style={{ paddingBottom: "0.2em" }} />

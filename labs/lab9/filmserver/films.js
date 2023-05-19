@@ -94,41 +94,27 @@ class FilmLibrary {
             })
         });
     }
-    async modifyFilmFromDb(filmId, title, favorite, watchDate, score) {
-        const nRows = await this._internalExecuteQuery("SELECT COUNT(*) AS n_rows FROM films WHERE id = ?", filmId, (row, obj) => {
-            Object.assign(obj, row);
-        }, {});
 
-        if (nRows.n_rows === 0) throw new Error(`Film with id ${filmId} not found`);
-
-        if (typeof watchDate === "string") watchDate = dayjs(watchDate);
-
-        return new Promise((resolve, reject) => {
-            this.db.run("UPDATE films SET title = ?, favorite = ?, watchdate = ?, rating = ? WHERE id = ?", title, favorite, watchDate.format('YYYY-MM-DD'), score, filmId, function (err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(filmId);
-                }
-            })
-        });
+    getQueryFromParams(paramobj) {
+        return Object.keys(paramobj).map((k) => `${k} = ?`).join(', ');
+    }
+    async modifyFilmFromDb(filmId, paramobj) {
+        const watchDateType = typeof paramobj['watchDate'];
+        if (watchDateType === "string") paramobj['watchDate'] = dayjs(paramobj['watchDate']).format('YYYY-MM-DD');
+        else if (watchDateType === "object") paramobj['watchDate'] = paramobj['watchDate'].format('YYYY-MM-DD');
+        const query = `UPDATE films SET ${this.getQueryFromParams(paramobj)} WHERE id = ? RETURNING id`;
+        const res = await this._internalExecuteQuery(query, ...Object.values(paramobj), filmId, (row, arr) => {
+            arr.push(row.id);
+        }, []); 
+        if (res.length === 0) throw new Error(`Film with id ${filmId} not found`);
+        return res[0];
     }
     async deleteFilmFromDb(filmId) {
-        const nRows = await this._internalExecuteQuery("SELECT COUNT(*) AS n_rows FROM films WHERE id = ?", filmId, (row, obj) => {
-            Object.assign(obj, row);
-        }, {});
-
-        if (nRows.n_rows === 0) throw new Error(`Film with id ${filmId} not found`);
-        
-        return new Promise((resolve, reject) => {
-            this.db.run("DELETE FROM films WHERE id = ?", filmId, function (err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(filmId);
-                }
-            })
-        });
+        const res = await this._internalExecuteQuery("DELETE FROM films WHERE id = ? RETURNING id", filmId, (row, arr) => {
+            arr.push(row.id);
+        }, []);
+        if (res.length === 0) throw new Error(`Film with id ${filmId} not found`);
+        return res[0];
     }
     async close() {
         return new Promise((resolve, reject) => {

@@ -91,8 +91,13 @@ app.put('/api/films/:id', [
         return res.status(422).json({ errors: errors.array() });
     }
     try {
-        await filmLibrary.modifyFilmFromDb(req.params.id, req.body.title, req.body.favorite, req.body.watchDate, req.body.score);
-        res.status(201).json({ id: req.params.id });
+        const modifiedFilmId = await filmLibrary.modifyFilmFromDb(req.params.id, { 
+            title: req.body.title, 
+            favorite: req.body.favorite, 
+            watchDate: req.body.watchDate, 
+            rating: req.body.score 
+        });
+        res.status(201).json({ id: modifiedFilmId });
     } catch (err) {
         res.status(404).json({ error: err.message });
     }
@@ -106,22 +111,17 @@ app.put('/api/films/:id/rate', [
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    let film = null;
     try {
-        film = await filmLibrary.getFilmFromDb(req.params.id);
-    } catch (err) {
-        res.status(404).json({ error: err.message });
-        return;
-    }
-    try {
-        await filmLibrary.modifyFilmFromDb(req.params.id, film.title, film.favorite, film.watchDate, req.body.score);
-        res.status(201).json({ id: req.params.id });
+        const modifiedFilmId = await filmLibrary.modifyFilmFromDb(req.params.id, {
+            rating: req.body.score
+        });
+        res.status(201).json({ id: modifiedFilmId });
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
 });
 
-//  Update the rating of a specific film.
+//  Update the favorite status of a specific film.
 app.put('/api/films/:id/favorite', [
     check('is').isBoolean()
 ], async (req, res) => {
@@ -129,16 +129,11 @@ app.put('/api/films/:id/favorite', [
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    let film = null;
     try {
-        film = await filmLibrary.getFilmFromDb(req.params.id);
-    } catch (err) {
-        res.status(404).json({ error: err.message });
-        return;
-    }
-    try {
-        await filmLibrary.modifyFilmFromDb(req.params.id, film.title, req.body.is, film.watchDate, film.score);
-        res.status(201).json({ id: req.params.id });
+        const modifiedFilmId = await filmLibrary.modifyFilmFromDb(req.params.id, {
+            favorite: req.body.is
+        });
+        res.status(201).json({ id: modifiedFilmId });
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
@@ -147,14 +142,8 @@ app.put('/api/films/:id/favorite', [
 //  Delete an existing film, given its “id”.
 app.delete('/api/films/:id', async (req, res) => {
     try {
-        await filmLibrary.getFilmFromDb(req.params.id);
-    } catch (err) {
-        res.status(404).json({ error: err.message });
-        return;
-    }
-    try {
-        await filmLibrary.deleteFilmFromDb(req.params.id);
-        res.status(204).json({ id: req.params.id });
+        const deletedFilmId = await filmLibrary.deleteFilmFromDb(req.params.id);
+        res.status(204).json({ id: deletedFilmId });
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
