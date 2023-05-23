@@ -59,7 +59,7 @@ class Filter {
         this.name = name;
     }
     toString() {
-        return `Filter(name: ${this.name}, func: ${this.func}, urlfriendlyname: ${this.urlfriendlyname})`;
+        return `Filter(name: ${this.name}, urlfriendlyname: ${this.urlfriendlyname})`;
     }
 }
 

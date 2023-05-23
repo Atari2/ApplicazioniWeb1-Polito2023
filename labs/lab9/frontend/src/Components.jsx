@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Col, Container, Row, Button, Form, Table, ListGroup, Navbar, Nav, InputGroup, Modal, Offcanvas } from 'react-bootstrap';
+import { Col, Container, Row, Button, Form, Table, ListGroup, Navbar, Nav, InputGroup, Modal, Offcanvas, Spinner } from 'react-bootstrap';
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Route, Routes, Link, useParams, useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -309,17 +309,46 @@ function MyRow(props) {
     );
 }
 
+function ErrorModal(props) {
+    const [show, setShow] = useState(true);
+    const handleClose = () => setShow(false);
+    return (
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Error</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{props.message}</Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>Close</Button>
+            </Modal.Footer>
+        </Modal>
+    );
+}
+
 function MyTable(props) {
     const { library, updateLibrary } = useContext(LibraryContext);
     const searchTerm = props.searchTerm;
     const filter = getFilterByUrl();
+    const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(true);
 
+    async function populateState(filter) {
+        setLoading(true);
+        try {
+            updateLibrary(FilmLibrary.from([]));
+            const q = await getFilmsFiltered(filter.urlfriendlyname);
+            updateLibrary(FilmLibrary.fromJSON(q));
+        } catch (e) {
+            setError(true);
+            setErrorMessage(e.message);
+        }
+        setLoading(false);
+    }
 
     useEffect(() => {
-        getFilmsFiltered(filter.urlfriendlyname)
-        .then((q) => updateLibrary(FilmLibrary.fromJSON(q)))
-        .catch((e) => console.log(e));
-    }, [filter]);
+        populateState(filter);
+    }, [filter.name]);
 
     const deleteRow = (id) => {
         updateLibrary((oldLibrary) => {
@@ -372,7 +401,9 @@ function MyTable(props) {
 
     return (
         <>
+            {error && <ErrorModal message={errorMessage} />}
             <h1>{filter.name}</h1>
+            {loading && <Spinner animation="border" />}
             <Table>
                 {/* <Table striped bordered hover> */}
                 <tbody>
