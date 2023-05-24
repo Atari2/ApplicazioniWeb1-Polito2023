@@ -1,0 +1,48 @@
+/* * {
+    border-color: red !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+} */
+.filter-white {
+    filter: invert(100%);
+}
+@media screen and (max-width: 800px) {
+    .hide-on-small-screen {
+        display: none !important;
+    }
+}
+@media screen and (min-width: 800px) {
+    .hide-on-large-screen {
+        display: none !important;
+    }
+}
+.full-height {
+    height: 100%;
+}
+.full-viewport {
+    height: 100vh;
+}
+.round-button {
+    border-style: none;
+    border-radius: 50%;
+    text-align: center;
+}
+.fixed-bottom-right {
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+}
+.center-text {
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+}
+.pending-deletion {
+    filter: opacity(20%)
+}
+.pending-modification {
+    filter: sepia()
+}
+.color-grey {
+    background-color: rgb(248, 249, 250);
+}
