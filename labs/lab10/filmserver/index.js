@@ -10,6 +10,16 @@ const dayjs = require('dayjs');
 const app = express();
 const filmLibrary = new FilmLibrary("films.db");
 
+const ENABLE_ARTIFICIAL_DELAY = true;
+const ARTIFICIAL_DELAY_MS = 2000;
+
+function conditionallyReplyWithDelay(functor) {
+    if (ENABLE_ARTIFICIAL_DELAY)
+        setTimeout(() => functor(), ARTIFICIAL_DELAY_MS);
+    else
+        functor();
+}
+
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors())
@@ -17,7 +27,7 @@ app.use(cors())
 app.get('/api/films', async (req, res) => {
     try {
         const films = await filmLibrary.getAllFromDb();
-        res.json(films);
+        conditionallyReplyWithDelay(() => res.json(films));
     } catch (err) {
         res.status(500).send({ error: err.message });
     }
@@ -27,23 +37,23 @@ app.get('/api/films/filter/:filter', async (req, res) => {
     switch (req.params.filter) {
         case "all":
             const films = await filmLibrary.getAllFromDb();
-            res.json(films);
+            conditionallyReplyWithDelay(() => res.json(films));
             break;
         case "favorites":
             const favouriteFilms = await filmLibrary.getFavouriteFromDb();
-            res.json(favouriteFilms);
+            conditionallyReplyWithDelay(() => res.json(favouriteFilms));
             break;
         case "best-rated":
             const bestRatedFilms = await filmLibrary.getRatedAtLeastFromDb(5);
-            res.json(bestRatedFilms);
+            conditionallyReplyWithDelay(() => res.json(bestRatedFilms));
             break;
         case "seen-last-month":
             const lastMonthFilms = await filmLibrary.getWatchedLastMonthFromDb();
-            res.json(lastMonthFilms);
+            conditionallyReplyWithDelay(() => res.json(lastMonthFilms));
             break;
         case "unseen":
             const unseenFilms = await filmLibrary.getUnseenFromDb();
-            res.json(unseenFilms);
+            conditionallyReplyWithDelay(() => res.json(unseenFilms));
             break;
         default:
             res.status(404).send({ error: `${req.params.filter} is not a valid filter` });
@@ -55,7 +65,7 @@ app.get('/api/films/filter/:filter', async (req, res) => {
 app.get('/api/films/:id', async (req, res) => {
     try {
         const film = await filmLibrary.getFilmFromDb(req.params.id);
-        res.json(film);
+        conditionallyReplyWithDelay(() => res.json(film));
     } catch (err) {
         res.status(404).send({ error: err.message });
     }
@@ -88,7 +98,7 @@ app.post('/api/films', [
     }
     try {
         const ret = await filmLibrary.addNewFilmToDb(req.body.userId, req.body.title, req.body.favorite, req.body.watchDate, normalizeScore(req.body.score));
-        res.status(201).json({ id: ret });
+        conditionallyReplyWithDelay(() => res.status(201).json({ id: ret }));
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
@@ -119,7 +129,7 @@ app.put('/api/films/:id', [
             rating: normalizeScore(req.body.score),
             user: req.body.userId
         });
-        res.status(201).json({ id: modifiedFilmId });
+        conditionallyReplyWithDelay(() => res.status(201).json({ id: modifiedFilmId }));
     } catch (err) {
         res.status(404).json({ error: err.message });
     }
@@ -137,7 +147,7 @@ app.put('/api/films/:id/rate', [
         const modifiedFilmId = await filmLibrary.modifyFilmFromDb(req.params.id, {
             rating: normalizeScore(req.body.score)
         });
-        res.status(201).json({ id: modifiedFilmId });
+        conditionallyReplyWithDelay(() => res.status(201).json({ id: modifiedFilmId }));
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
@@ -155,7 +165,7 @@ app.put('/api/films/:id/favorite', [
         const modifiedFilmId = await filmLibrary.modifyFilmFromDb(req.params.id, {
             favorite: req.body.is
         });
-        res.status(201).json({ id: modifiedFilmId });
+        conditionallyReplyWithDelay(() => res.status(201).json({ id: modifiedFilmId }));
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
@@ -165,7 +175,7 @@ app.put('/api/films/:id/favorite', [
 app.delete('/api/films/:id', async (req, res) => {
     try {
         const deletedFilmId = await filmLibrary.deleteFilmFromDb(req.params.id);
-        res.status(204).json({ id: deletedFilmId });
+        conditionallyReplyWithDelay(() => res.status(204).json({ id: deletedFilmId }));
     } catch (err) {
         res.status(503).json({ error: err.message });
     }
