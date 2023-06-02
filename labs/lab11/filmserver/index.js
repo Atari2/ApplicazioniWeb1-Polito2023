@@ -49,7 +49,7 @@ const ARTIFICIAL_DELAY_MS = 500;
 
 function conditionallyReplyWithDelay(functor) {
     if (ENABLE_ARTIFICIAL_DELAY)
-        setTimeout(() => functor(), ARTIFICIAL_DELAY_MS);
+        setTimeout(functor, ARTIFICIAL_DELAY_MS);
     else
         functor();
 }
